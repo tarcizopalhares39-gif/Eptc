@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EPTC Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--card:#0a0a0c;--line:#22222a;--tx:#ececf0;--mu:#8b8b97;--g:#2ee59d;--y:#ffc94a;--r:#ff4d5e;--b:#4da3ff;color-scheme:dark}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--bg);color:var(--tx);font-family:Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{padding:0 14px calc(30px + env(safe-area-inset-bottom,0px));max-width:760px;margin:0 auto}
+header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:calc(12px + env(safe-area-inset-top,0px)) 0 12px;background:linear-gradient(#000 80%,transparent)}
+.logo{font-weight:800;font-size:19px;letter-spacing:.3px}.logo small{display:block;font-weight:500;font-size:11px;color:var(--mu);letter-spacing:0}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mu);margin-right:6px}.dot.ok{background:var(--g);box-shadow:0 0 8px var(--g)}.dot.err{background:var(--r);box-shadow:0 0 8px var(--r)}
+#mb{background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:12px;width:44px;height:44px;font-size:20px;cursor:pointer}
+#mb:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--b);outline-offset:2px}
+nav{position:absolute;right:0;top:calc(62px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:6px;pointer-events:none}
+nav button{opacity:0;transform:translateY(-10px);transition:.22s;transition-delay:calc(var(--i)*45ms);background:var(--card);border:1px solid var(--line);color:var(--tx);padding:11px 18px;border-radius:12px;font:600 14px Inter;text-align:right;min-width:150px;cursor:pointer}
+nav.open{pointer-events:auto}nav.open button{opacity:1;transform:none}
+nav button.on{border-color:var(--g);box-shadow:0 0 16px -4px var(--g);color:var(--g)}
+.card{--c:var(--line);background:radial-gradient(120% 90% at 50% 0,color-mix(in srgb,var(--c) 14%,transparent),transparent 60%),var(--card);border:1px solid color-mix(in srgb,var(--c) 55%,var(--line));border-radius:16px;padding:16px;box-shadow:0 0 26px -10px var(--c),inset 0 1px 0 rgba(255,255,255,.04)}
+.s-g{--c:var(--g)}.s-y{--c:var(--y)}.s-r{--c:var(--r)}.s-b{--c:var(--b)}
+.txg{color:var(--g)}.txy{color:var(--y)}.txr{color:var(--r)}
+.lbl{font-size:12px;color:var(--mu);font-weight:500}
+.big{font-size:64px;font-weight:800;letter-spacing:-2px;line-height:1.05;margin:6px 0 2px}
+.num{font-size:30px;font-weight:700;letter-spacing:-.5px;margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.full{grid-column:1/-1}
+.view{display:none}.view.on{display:block}
+h2{font-size:15px;font-weight:700;margin:18px 2px 10px}
+.br{display:grid;grid-template-columns:78px 1fr 58px;gap:8px;align-items:center;font-size:13px;margin:9px 0}
+.br i{height:6px;background:#17171c;border-radius:6px;overflow:hidden}.br b{display:block;height:100%;background:var(--c);box-shadow:0 0 10px var(--c);border-radius:6px}
+.br em{font-style:normal;text-align:right;font-weight:700;color:var(--c)}.br span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seg{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.seg button,.btn{background:var(--card);border:1px solid var(--line);color:var(--mu);padding:9px 14px;border-radius:10px;font:600 13px Inter;cursor:pointer}
+.seg button.on{color:var(--tx);border-color:var(--b);box-shadow:0 0 14px -4px var(--b)}
+.btn{background:linear-gradient(#3a2a1c,#1f160d);border-color:#8a5a2b;color:#f1c697;width:100%;padding:13px;font-size:14px;margin-top:8px}
+.sc{overflow-x:auto;border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+th{color:var(--mu);font-weight:500;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid #15151a}td.r,th.r{text-align:right}
+td.p{font-weight:700;color:var(--c)}
+label{display:block;font-size:12px;color:var(--mu);margin:12px 0 5px}
+input,select{width:100%;background:#050507;border:1px solid var(--line);color:var(--tx);padding:12px;border-radius:10px;font:500 15px Inter}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#msg{font-size:13px;margin-top:10px;min-height:18px}
+canvas{width:100%;display:block;touch-action:pan-y}
+#ro{font-size:13px;color:var(--mu);min-height:20px;margin-top:8px}
+.note{font-size:12px;color:var(--mu);line-height:1.5;margin-top:10px}
+@media (prefers-reduced-motion:reduce){nav button{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">EPTC<small><span class="dot" id="dot"></span><span id="sync">sem conexão com a planilha</span></small></div>
+  <button id="mb" aria-label="Menu">☰</button>
+  <nav id="nav"></nav>
+</header>
+
+<section class="view on" id="v-painel">
+  <div class="card" id="hero">
+    <div class="lbl">EPTC geral</div>
+    <div class="big" id="h-p">—</div>
+    <div class="lbl" id="h-s"></div>
+  </div>
+  <div class="grid">
+    <div class="card" id="c-w"><div class="lbl">Semana atual</div><div class="num" id="w-p">—</div><div class="lbl" id="w-s"></div></div>
+    <div class="card" id="c-m"><div class="lbl">Mês atual</div><div class="num" id="m-p">—</div><div class="lbl" id="m-s"></div></div>
+    <div class="card s-b"><div class="lbl">Registrados no total</div><div class="num" id="t-t">0</div></div>
+    <div class="card s-g"><div class="lbl">Entregues no total</div><div class="num" id="t-e">0</div></div>
+  </div>
+  <h2>Por turno</h2><div class="card s-b" id="b-u"></div>
+  <h2>Por setor</h2><div class="card s-b" id="b-s"></div>
+</section>
+
+<section class="view" id="v-reg">
+  <div class="seg" id="seg-r"></div>
+  <div id="r-filters" class="row2" style="margin-bottom:12px"><select id="f-s"></select><select id="f-u"></select></div>
+  <div class="card s-b"><div class="sc" id="r-tab"></div></div>
+</section>
+
+<section class="view" id="v-graf">
+  <div class="seg" id="seg-g"></div>
+  <div class="card s-b"><canvas id="cv"></canvas><div id="ro">Toque no gráfico para ver o valor.</div></div>
+</section>
+
+<section class="view" id="v-ins">
+  <div class="card s-g">
+    <div class="lbl">Novo registro na planilha</div>
+    <label>Data</label><input type="date" id="i-d">
+    <div class="row2"><div><label>Setor</label><input id="i-s" list="dl-s" placeholder="Ex.: 12"><datalist id="dl-s"></datalist></div>
+    <div><label>Turno</label><select id="i-u"><option>Manhã</option><option>Tarde</option><option>Noite</option></select></div></div>
+    <div class="row2"><div><label>Objetos a entregar</label><input type="number" id="i-t" min="0" inputmode="numeric"></div>
+    <div><label>Objetos entregues</label><input type="number" id="i-e" min="0" inputmode="numeric"></div></div>
+    <button class="btn" id="i-go">Enviar para a planilha</button>
+    <div id="msg"></div>
+  </div>
+</section>
+
+<section class="view" id="v-cfg">
+  <div class="card s-b">
+    <label style="margin-top:0">URL do Apps Script (termina em /exec)</label><input id="c-u" placeholder="https://script.google.com/macros/s/.../exec">
+    <div class="row2"><div><label>Vermelho abaixo de (%)</label><input type="number" id="c-l" step="0.1"></div>
+    <div><label>Verde acima de (%)</label><input type="number" id="c-h" step="0.1"></div></div>
+    <button class="btn" id="c-go">Salvar e sincronizar</button>
+    <p class="note">Abaixo do primeiro valor fica vermelho; entre os dois, amarelo; acima do segundo, verde.</p>
+  </div>
+</section>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const J=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
+let cfg=Object.assign({url:"",low:90,high:95},J("eptc_cfg",{}));
+let D=J("eptc_data",[]);
+let tab="painel",rsub="lista",gsub="dia",sel=-1;
+
+const pd=s=>{const[a,b,c]=s.split("-").map(Number);return new Date(a,b-1,c)};
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const wk=s=>{const d=pd(s);d.setDate(d.getDate()-(d.getDay()+6)%7);return iso(d)};
+const fd=s=>pd(s).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"});
+const sum=a=>({t:a.reduce((x,r)=>x+r.t,0),e:a.reduce((x,r)=>x+r.e,0)});
+const pct=o=>o.t?o.e/o.t*100:NaN;
+const fp=v=>isNaN(v)?"—":v.toFixed(1).replace(".",",")+"%";
+const cls=v=>isNaN(v)?"":v<cfg.low?"r":v<=cfg.high?"y":"g";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const group=fn=>{const m={};D.forEach(r=>{(m[fn(r)]=m[fn(r)]||[]).push(r)});return m};
+const COL={g:"#2ee59d",y:"#ffc94a",r:"#ff4d5e"};
+
+/* menu em cascata */
+const TABS=[["painel","Painel"],["reg","Registros"],["graf","Gráficos"],["ins","Inserir"],["cfg","Config"]];
+$("#nav").innerHTML=TABS.map((t,i)=>`<button style="--i:${i}" data-t="${t[0]}">${t[1]}</button>`).join("");
+$("#mb").onclick=e=>{e.stopPropagation();$("#nav").classList.toggle("open")};
+document.addEventListener("click",()=>$("#nav").classList.remove("open"));
+$("#nav").onclick=e=>{const t=e.target.dataset.t;if(t)go(t)};
+function go(t){tab=t;$$(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+t));$$("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));$("#nav").classList.remove("open");render();scrollTo(0,0)}
+
+function seg(el,items,cur,fn){$(el).innerHTML=items.map(i=>`<button class="${i[0]===cur?"on":""}" data-k="${i[0]}">${i[1]}</button>`).join("");$(el).onclick=e=>{if(e.target.dataset.k){fn(e.target.dataset.k);render()}}}
+
+function paint(id,v){const c=cls(v);$(id).className=$(id).className.replace(/\bs-[gyr]\b/g,"").trim()+(c?" s-"+c:"")}
+function setP(idv,idc,o){const v=pct(o),c=cls(v);$(idv).textContent=fp(v);$(idv).className=$(idv).className.replace(/\btx[gyr]\b/g,"").trim()+(c?" tx"+c:"");paint(idc,v)}
+
+function brk(el,fn){
+  const arr=Object.entries(group(fn)).map(([k,a])=>({k,p:pct(sum(a))})).sort((a,b)=>a.p-b.p);
+  $(el).innerHTML=arr.length?arr.map(x=>`<div class="br s-${cls(x.p)}"><span>${esc(x.k||"—")}</span><i><b style="width:${isNaN(x.p)?0:x.p}%"></b></i><em>${fp(x.p)}</em></div>`).join(""):'<span class="lbl">Sem dados ainda.</span>';
+}
+
+function tbl(head,rows){return `<table><thead><tr>${head.map((h,i)=>`<th class="${i>1?"r":""}">${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table>`}
+const prow=(lab,o)=>{const p=pct(o);return `<tr class="s-${cls(p)}"><td>${lab}</td><td class="r">${o.t}</td><td class="r">${o.e}</td><td class="r p">${fp(p)}</td></tr>`}
+
+function render(){
+  if(tab==="painel"){
+    const now=iso(new Date()),cw=wk(now),cm=now.slice(0,7);
+    const tot=sum(D),w=sum(D.filter(r=>wk(r.d)===cw)),m=sum(D.filter(r=>r.d.slice(0,7)===cm));
+    setP("#h-p","#hero",tot);setP("#w-p","#c-w",w);setP("#m-p","#c-m",m);
+    $("#h-s").textContent=tot.e+" entregues de "+tot.t;
+    $("#w-s").textContent=w.e+" de "+w.t;$("#m-s").textContent=m.e+" de "+m.t;
+    $("#t-t").textContent=tot.t;$("#t-e").textContent=tot.e;
+    brk("#b-u",r=>r.u);brk("#b-s",r=>r.s);
+  }
+  if(tab==="reg"){
+    seg("#seg-r",[["lista","Objetos"],["sem","Semanal"],["mes","Mensal"]],rsub,k=>rsub=k);
+    $("#r-filters").style.display=rsub==="lista"?"grid":"none";
+    if(rsub==="lista"){
+      const fill=(id,all,key)=>{const cur=$(id).value,v=[...new Set(D.map(r=>r[key]))].sort();$(id).innerHTML=`<option value="">${all}</option>`+v.map(x=>`<option>${esc(x)}</option>`).join("");$(id).value=v.includes(cur)?cur:""};
+      if(!$("#f-s").options.length||$("#f-s").options.length-1!==new Set(D.map(r=>r.s)).size){fill("#f-s","Todos os setores","s");fill("#f-u","Todos os turnos","u")}
+      const L=D.filter(r=>(!$("#f-s").value||r.s===$("#f-s").value)&&(!$("#f-u").value||r.u===$("#f-u").value)).sort((a,b)=>b.d.localeCompare(a.d)).slice(0,300);
+      $("#r-tab").innerHTML=L.length?`<table><thead><tr><th>Data</th><th>Setor</th><th>Turno</th><th class="r">A entregar</th><th class="r">Entregues</th><th class="r">EPTC</th></tr></thead><tbody>${L.map(r=>{const p=pct(r);return `<tr class="s-${cls(p)}"><td>${fd(r.d)}</td><td>${esc(r.s)}</td><td>${esc(r.u)}</td><td class="r">${r.t}</td><td class="r">${r.e}</td><td class="r p">${fp(p)}</td></tr>`}).join("")}</tbody></table>`:'<span class="lbl">Sem registros. Configure a planilha em Config.</span>';
+    }else{
+      const g=group(rsub==="sem"?r=>wk(r.d):r=>r.d.slice(0,7));
+      const rows=Object.keys(g).sort().reverse().map(k=>prow(rsub==="sem"?fd(k)+" a "+fd(iso(new Date(pd(k).getTime()+6*864e5))):pd(k+"-01").toLocaleDateString("pt-BR",{month:"long",year:"numeric"}),sum(g[k])));
+      $("#r-tab").innerHTML=rows.length?tbl([rsub==="sem"?"Semana":"Mês","A entregar","Entregues","EPTC"],rows):'<span class="lbl">Sem dados.</span>';
+    }
+  }
+  if(tab==="graf"){seg("#seg-g",[["dia","Diário"],["sem","Semanal"]],gsub,k=>{gsub=k;sel=-1});draw()}
+  if(tab==="ins"){$("#dl-s").innerHTML=[...new Set(D.map(r=>r.s))].map(s=>`<option value="${esc(s)}">`).join("")}
+}
+
+/* gráfico */
+function pts(){
+  const g=group(gsub==="dia"?r=>r.d:r=>wk(r.d));
+  return Object.keys(g).sort().slice(gsub==="dia"?-30:-12).map(k=>({l:fd(k),o:sum(g[k]),p:pct(sum(g[k]))}));
+}
+function draw(){
+  const c=$("#cv"),w=c.parentElement.clientWidth-32,h=260,dp=devicePixelRatio||1;
+  c.width=w*dp;c.height=h*dp;c.style.height=h+"px";c.style.width=w+"px";
+  const x=c.getContext("2d");x.scale(dp,dp);x.font="11px Inter";
+  const P=pts();
+  if(!P.length){x.fillStyle="#8b8b97";x.fillText("Sem dados para o gráfico.",4,30);return}
+  const L=34,R=10,T=12,B=24,lo=Math.max(0,Math.floor((Math.min(...P.map(p=>p.p),cfg.low)-3)/5)*5),hi=100;
+  const X=i=>L+(P.length<2?(w-L-R)/2:i*(w-L-R)/(P.length-1)),Y=v=>T+(hi-v)/(hi-lo)*(h-T-B);
+  x.textAlign="right";
+  for(let v=lo;v<=hi;v+=5){x.strokeStyle="#15151a";x.beginPath();x.moveTo(L,Y(v));x.lineTo(w-R,Y(v));x.stroke();x.fillStyle="#6b6b76";x.fillText(v,L-6,Y(v)+4)}
+  [[cfg.low,COL.r],[cfg.high,COL.y]].forEach(([v,col])=>{if(v>=lo&&v<=hi){x.setLineDash([5,5]);x.strokeStyle=col;x.globalAlpha=.6;x.beginPath();x.moveTo(L,Y(v));x.lineTo(w-R,Y(v));x.stroke();x.setLineDash([]);x.globalAlpha=1}});
+  x.shadowColor="#4da3ff";x.shadowBlur=10;x.strokeStyle="#4da3ff";x.lineWidth=2;x.lineJoin="round";x.beginPath();
+  P.forEach((p,i)=>{i?x.lineTo(X(i),Y(p.p)):x.moveTo(X(i),Y(p.p))});x.stroke();x.shadowBlur=0;
+  P.forEach((p,i)=>{x.fillStyle=COL[cls(p.p)]||"#8b8b97";x.beginPath();x.arc(X(i),Y(p.p),i===sel?5.5:3.2,0,7);x.fill()});
+  x.fillStyle="#6b6b76";x.textAlign="center";
+  const st=Math.max(1,Math.ceil(P.length/6));P.forEach((p,i)=>{if(i%st===0||i===P.length-1)x.fillText(p.l,X(i),h-7)});
+  if(sel>=0&&P[sel]){x.strokeStyle="#ffffff40";x.beginPath();x.moveTo(X(sel),T);x.lineTo(X(sel),h-B);x.stroke();
+    $("#ro").innerHTML=`<b style="color:${COL[cls(P[sel].p)]}">${fp(P[sel].p)}</b> em ${P[sel].l} · ${P[sel].o.e} de ${P[sel].o.t} objetos`}
+  c._X=X;c._n=P.length;
+}
+const pick=e=>{const c=$("#cv"),r=c.getBoundingClientRect(),px=e.clientX-r.left;if(!c._X)return;let b=0;for(let i=0;i<c._n;i++)if(Math.abs(c._X(i)-px)<Math.abs(c._X(b)-px))b=i;sel=b;draw()};
+$("#cv").addEventListener("pointerdown",pick);$("#cv").addEventListener("pointermove",e=>{if(e.pressure>0)pick(e)});
+addEventListener("resize",()=>{if(tab==="graf")draw()});
+
+/* planilha */
+function status(ok,t){$("#dot").className="dot "+(ok?"ok":"err");$("#sync").textContent=t}
+async function load(){
+  if(!cfg.url){status(false,"configure a planilha em Config");render();return}
+  try{
+    const r=await fetch(cfg.url),j=await r.json();
+    D=j.rows.filter(x=>x.d&&x.t>=0);localStorage.setItem("eptc_data",JSON.stringify(D));
+    status(true,"sincronizado "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}));
+  }catch(e){status(false,"offline, mostrando últimos dados")}
+  render();
+}
+$("#i-go").onclick=async()=>{
+  const r={d:$("#i-d").value,s:$("#i-s").value.trim(),u:$("#i-u").value,t:+$("#i-t").value,e:+$("#i-e").value},m=$("#msg");
+  const err=!cfg.url?"Configure a URL do script em Config.":!r.d||!r.s||$("#i-t").value===""||$("#i-e").value===""?"Preencha todos os campos.":r.e>r.t?"Entregues não pode passar de objetos a entregar.":"";
+  if(err){m.style.color="var(--r)";m.textContent=err;return}
+  m.style.color="var(--mu)";m.textContent="Enviando...";$("#i-go").disabled=true;
+  try{
+    const res=await fetch(cfg.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(r)}),j=await res.json();
+    if(!j.ok)throw new Error(j.error||"falha");
+    m.style.color="var(--g)";m.textContent="Registro salvo: "+fp(pct(r))+" de EPTC.";$("#i-t").value=$("#i-e").value="";load();
+  }catch(e){m.style.color="var(--r)";m.textContent="Não foi possível salvar. Confira a URL e a implantação do script."}
+  $("#i-go").disabled=false;
+};
+$("#c-go").onclick=()=>{cfg={url:$("#c-u").value.trim(),low:+$("#c-l").value||90,high:+$("#c-h").value||95};localStorage.setItem("eptc_cfg",JSON.stringify(cfg));load();go("painel")};
+["#f-s","#f-u"].forEach(s=>$(s).onchange=render);
+$("#c-u").value=cfg.url;$("#c-l").value=cfg.low;$("#c-h").value=cfg.high;$("#i-d").value=iso(new Date());
+go("painel");load();
+</script>
+</body>
+</html>
